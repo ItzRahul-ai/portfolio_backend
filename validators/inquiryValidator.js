@@ -18,25 +18,40 @@ const ensureArrayOfStrings = (value) => {
 };
 
 const validateInquiryInput = (payload = {}) => {
+  const fallbackMessage = clean(payload.message);
+  const isSimpleInquiry =
+    !clean(payload.phone) &&
+    !clean(payload.projectType) &&
+    !clean(payload.budget) &&
+    !clean(payload.requirements) &&
+    !clean(payload.timeline);
+
   const data = {
     name: clean(payload.name),
-    phone: clean(payload.phone),
+    phone: clean(payload.phone || '0000000000'),
     email: clean(payload.email).toLowerCase(),
-    projectType: clean(payload.projectType),
-    budget: clean(payload.budget),
-    requirements: clean(payload.requirements),
-    timeline: clean(payload.timeline)
+    projectType: clean(payload.projectType || 'General Inquiry'),
+    budget: clean(payload.budget || 'Not specified'),
+    requirements: clean(payload.requirements || fallbackMessage),
+    timeline: clean(payload.timeline || 'Not specified')
   };
 
   const errors = [];
 
   if (data.name.length < 2) errors.push('Name is required');
-  if (!phonePattern.test(data.phone)) errors.push('Valid phone number is required');
   if (!emailPattern.test(data.email)) errors.push('Valid email is required');
-  if (data.projectType.length < 2) errors.push('Project type is required');
-  if (data.budget.length < 1) errors.push('Budget is required');
-  if (data.requirements.length < 10) errors.push('Website requirements should be at least 10 characters');
-  if (data.timeline.length < 2) errors.push('Timeline is required');
+
+  if (isSimpleInquiry) {
+    if (data.requirements.length < 5) {
+      errors.push('Message is required');
+    }
+  } else {
+    if (!phonePattern.test(data.phone)) errors.push('Valid phone number is required');
+    if (data.projectType.length < 2) errors.push('Project type is required');
+    if (data.budget.length < 1) errors.push('Budget is required');
+    if (data.requirements.length < 10) errors.push('Website requirements should be at least 10 characters');
+    if (data.timeline.length < 2) errors.push('Timeline is required');
+  }
 
   return { errors, data };
 };

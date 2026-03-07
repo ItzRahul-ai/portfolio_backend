@@ -5,7 +5,8 @@ const notFound = (req, res, _next) => {
 };
 
 const errorHandler = (err, _req, res, _next) => {
-  const statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
+  const isCorsError = typeof err?.message === 'string' && err.message.startsWith('CORS blocked');
+  const statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : isCorsError ? 403 : 500;
 
   res.status(statusCode).json({
     message: err.message || 'Internal server error'
